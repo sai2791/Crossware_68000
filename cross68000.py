@@ -306,9 +306,20 @@ subroutine(0xaf4a, "print_bad_name")
 entry(0xaf58)
 label(0xaf56, "laf56")
 subroutine(0x81a6, "handle_brk_service_call")
-
-
-
+subroutine(0x80dc, "restore_everything_exit")
+subroutine(0x9e02, "print_help_name")
+subroutine(0x9df8, "print_text_no")
+subroutine(0x9e18, "print_full_help_text")
+labelword(0xdea, "X_IND2V")
+label(0x444, "file_handle")
+label(0xde9, "X_IND1V_Rom_number")
+labelword(0xde7, "X_IND1V")
+subroutine(0x9e92, "enter_language_rom")
+subroutine(0x9e9a, "new_ind2v_code")
+immaddr(0x9e50, 0x9e55)
+subroutine(0x9ed7, "insert_keystroke")
+subroutine(0x9ed2, "insert_keystroke_from_stack")
+subroutine(0x9eee, "set_X_IND1_X_IND2_rom_number")
 go()
 
 

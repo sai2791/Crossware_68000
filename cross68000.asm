@@ -149,7 +149,7 @@ l0440               = &0440
 l0441               = &0441
 l0442               = &0442
 l0443               = &0443
-l0444               = &0444
+file_handle         = &0444
 l046c               = &046c
 l046d               = &046d
 l046e               = &046e
@@ -176,11 +176,9 @@ l06f0               = &06f0
 l0700               = &0700
 l0c00               = &0c00
 l0c06               = &0c06
-l0de7               = &0de7
-l0de8               = &0de8
-l0de9               = &0de9
-l0dea               = &0dea
-l0deb               = &0deb
+X_IND1V             = &0de7
+X_IND1V_Rom_number  = &0de9
+X_IND2V             = &0dea
 X_IND2V_Rom_number  = &0dec
 l1096               = &1096
 l19b1               = &19b1
@@ -280,7 +278,7 @@ oscli               = &fff7
     lda l0038                                                         ; 806a: a5 38       .8
     pha                                                               ; 806c: 48          H
     jsr osnewl                                                        ; 806d: 20 e7 ff     ..            ; Write newline (characters 10 and 13)
-    jsr sub_c9e02                                                     ; 8070: 20 02 9e     ..
+    jsr print_help_name                                               ; 8070: 20 02 9e     ..
     jsr osnewl                                                        ; 8073: 20 e7 ff     ..            ; Write newline (characters 10 and 13)
     pla                                                               ; 8076: 68          h
     sta l0038                                                         ; 8077: 85 38       .8
@@ -314,7 +312,7 @@ oscli               = &fff7
     clc                                                               ; 8090: 18          .
     jsr gsinit                                                        ; 8091: 20 c2 ff     ..
     lda command_table,x                                               ; 8094: bd f7 80    ...
-    beq c80dc                                                         ; 8097: f0 43       .C
+    beq restore_everything_exit                                       ; 8097: f0 43       .C
     dex                                                               ; 8099: ca          .
     dey                                                               ; 809a: 88          .
 ; &809b referenced 1 time by &80a6
@@ -353,7 +351,7 @@ oscli               = &fff7
 ; &80cd referenced 1 time by &80c4
 .c80cd
     jsr check_if_ind2v_correct                                        ; 80cd: 20 79 81     y.
-    bcs c80dc                                                         ; 80d0: b0 0a       ..
+    bcs restore_everything_exit                                       ; 80d0: b0 0a       ..
 ; &80d2 referenced 1 time by &80cb
 .c80d2
     pla                                                               ; 80d2: 68          h
@@ -363,8 +361,9 @@ oscli               = &fff7
     pha                                                               ; 80da: 48          H
     rts                                                               ; 80db: 60          `
 
+; ***************************************************************************************
 ; &80dc referenced 2 times by &8097, &80d0
-.c80dc
+.restore_everything_exit
     pla                                                               ; 80dc: 68          h
     tay                                                               ; 80dd: a8          .
     pla                                                               ; 80de: 68          h
@@ -525,7 +524,7 @@ oscli               = &fff7
     jsr osbyte                                                        ; 81b4: 20 f4 ff     ..            ; Read ROM number active at last BRK
     pla                                                               ; 81b7: 68          h
     sta l00f0                                                         ; 81b8: 85 f0       ..
-    cpx l0de9                                                         ; 81ba: ec e9 0d    ...            ; X=value of ROM number active at last BRK
+    cpx X_IND1V_Rom_number                                            ; 81ba: ec e9 0d    ...            ; X=value of ROM number active at last BRK
     bne c8228                                                         ; 81bd: d0 69       .i
     txa                                                               ; 81bf: 8a          .
     tay                                                               ; 81c0: a8          .              ; Y=ROM number
@@ -561,10 +560,10 @@ oscli               = &fff7
     lda #&10                                                          ; 81f1: a9 10       ..
     and l0056                                                         ; 81f3: 25 56       %V
     beq c8204                                                         ; 81f5: f0 0d       ..
-    ldy l0444                                                         ; 81f7: ac 44 04    .D.
+    ldy file_handle                                                   ; 81f7: ac 44 04    .D.
     beq c8204                                                         ; 81fa: f0 08       ..
     lda #osfind_close                                                 ; 81fc: a9 00       ..
-    sta l0444                                                         ; 81fe: 8d 44 04    .D.
+    sta file_handle                                                   ; 81fe: 8d 44 04    .D.
     jsr osfind                                                        ; 8201: 20 ce ff     ..            ; Close one or all files
 ; &8204 referenced 2 times by &81f5, &81fa
 .c8204
@@ -861,10 +860,10 @@ l8249 = sub_c8247+2
 ; &85cc referenced 1 time by &85c8
 .c85cc
     lda (l0037),y                                                     ; 85cc: b1 37       .7
-    sta l0de7                                                         ; 85ce: 8d e7 0d    ...
+    sta X_IND1V                                                       ; 85ce: 8d e7 0d    ...
     iny                                                               ; 85d1: c8          .
     lda (l0037),y                                                     ; 85d2: b1 37       .7
-    sta l0de8                                                         ; 85d4: 8d e8 0d    ...
+    sta X_IND1V+1                                                     ; 85d4: 8d e8 0d    ...
     lda #4                                                            ; 85d7: a9 04       ..
     clc                                                               ; 85d9: 18          .
     adc l0037                                                         ; 85da: 65 37       e7
@@ -910,10 +909,10 @@ l8249 = sub_c8247+2
 ; &8618 referenced 1 time by &8614
 .c8618
     lda (l0037),y                                                     ; 8618: b1 37       .7
-    sta l0de7                                                         ; 861a: 8d e7 0d    ...
+    sta X_IND1V                                                       ; 861a: 8d e7 0d    ...
     iny                                                               ; 861d: c8          .
     lda (l0037),y                                                     ; 861e: b1 37       .7
-    sta l0de8                                                         ; 8620: 8d e8 0d    ...
+    sta X_IND1V+1                                                     ; 8620: 8d e8 0d    ...
     pla                                                               ; 8623: 68          h
     sta l0038                                                         ; 8624: 85 38       .8
     pla                                                               ; 8626: 68          h
@@ -950,7 +949,7 @@ l8249 = sub_c8247+2
 ; &864f referenced 1 time by &a0d8
 .c864f
     pha                                                               ; 864f: 48          H
-    lda l0de9                                                         ; 8650: ad e9 0d    ...
+    lda X_IND1V_Rom_number                                            ; 8650: ad e9 0d    ...
     sta romsel_copy                                                   ; 8653: 85 f4       ..
     pla                                                               ; 8655: 68          h
     jsr sub_c85f9                                                     ; 8656: 20 f9 85     ..
@@ -4947,9 +4946,9 @@ l9be5 = sub_c9be4+1
     ldy #&ff                                                          ; 9db4: a0 ff       ..
     ldx #0                                                            ; 9db6: a2 00       ..
     jsr osbyte                                                        ; 9db8: 20 f4 ff     ..            ; Read BASIC ROM number
-    stx l0de9                                                         ; 9dbb: 8e e9 0d    ...            ; X=value of BASIC ROM number
+    stx X_IND1V_Rom_number                                            ; 9dbb: 8e e9 0d    ...            ; X=value of BASIC ROM number
     txa                                                               ; 9dbe: 8a          .
-    bmi c9df8                                                         ; 9dbf: 30 37       07
+    bmi print_text_no                                                 ; 9dbf: 30 37       07
     tay                                                               ; 9dc1: a8          .              ; Y=ROM number
     lda #&7f                                                          ; 9dc2: a9 7f       ..
     and l0054                                                         ; 9dc4: 25 54       %T
@@ -4960,12 +4959,12 @@ l9be5 = sub_c9be4+1
     sta osrdsc_ptr+1                                                  ; 9dce: 85 f7       ..
     jsr osrdsc                                                        ; 9dd0: 20 b9 ff     ..            ; Read byte from ROM Y or screen
     cmp #&32 ; '2'                                                    ; 9dd3: c9 32       .2             ; A=byte read
-    beq c9e18                                                         ; 9dd5: f0 41       .A
+    beq print_full_help_text                                          ; 9dd5: f0 41       .A
     cmp #&34 ; '4'                                                    ; 9dd7: c9 34       .4
     bne print_text_wrong                                              ; 9dd9: d0 06       ..
     lda #&80                                                          ; 9ddb: a9 80       ..
     tsb l0054                                                         ; 9ddd: 04 54       .T
-    bra c9e18                                                         ; 9ddf: 80 37       .7
+    bra print_full_help_text                                          ; 9ddf: 80 37       .7
 ; ***************************************************************************************
 ; &9de1 referenced 1 time by &9dd9
 .print_text_wrong
@@ -4982,25 +4981,28 @@ l9be5 = sub_c9be4+1
 
     jmp c80f4                                                         ; 9df5: 4c f4 80    L..
 
+; ***************************************************************************************
 ; &9df8 referenced 1 time by &9dbf
-.c9df8
+.print_text_no
     jsr print_inline_string                                           ; 9df8: 20 5b 85     [.
     equs "No "                                                        ; 9dfb: 4e 6f 20    No
 
     nop                                                               ; 9dfe: ea          .
     jmp print_text_basic                                              ; 9dff: 4c eb 9d    L..
 
+; ***************************************************************************************
 ; &9e02 referenced 3 times by &8070, &9e18, &9eae
-.sub_c9e02
+.print_help_name
     jsr print_inline_string                                           ; 9e02: 20 5b 85     [.
     equs "Crossware 68000XR"                                          ; 9e05: 43 72 6f... Cro
     equb &ea                                                          ; 9e16: ea          .
 
     rts                                                               ; 9e17: 60          `
 
+; ***************************************************************************************
 ; &9e18 referenced 2 times by &9dd5, &9ddf
-.c9e18
-    jsr sub_c9e02                                                     ; 9e18: 20 02 9e     ..
+.print_full_help_text
+    jsr print_help_name                                               ; 9e18: 20 02 9e     ..
     jsr print_inline_string                                           ; 9e1b: 20 5b 85     [.
     equb &0d                                                          ; 9e1e: 0d          .
     equs "Version 3.07D"                                              ; 9e1f: 56 65 72... Ver
@@ -5024,10 +5026,10 @@ l9be5 = sub_c9be4+1
 
     lda romsel_copy                                                   ; 9e4a: a5 f4       ..
     sta X_IND2V_Rom_number                                            ; 9e4c: 8d ec 0d    ...
-    lda #&9a                                                          ; 9e4f: a9 9a       ..
-    sta l0dea                                                         ; 9e51: 8d ea 0d    ...
-    lda #&9e                                                          ; 9e54: a9 9e       ..
-    sta l0deb                                                         ; 9e56: 8d eb 0d    ...
+    lda #<(new_ind2v_code)                                            ; 9e4f: a9 9a       ..
+    sta X_IND2V                                                       ; 9e51: 8d ea 0d    ...
+    lda #>(new_ind2v_code)                                            ; 9e54: a9 9e       ..
+    sta X_IND2V+1                                                     ; 9e56: 8d eb 0d    ...
     lda #osbyte_read_write_first_byte_break_intercept                 ; 9e59: a9 f7       ..
     ldy #0                                                            ; 9e5b: a0 00       ..
     ldx #&4c ; 'L'                                                    ; 9e5d: a2 4c       .L
@@ -5041,7 +5043,7 @@ l9be5 = sub_c9be4+1
     ldy #0                                                            ; 9e6f: a0 00       ..
     sty l0057                                                         ; 9e71: 84 57       .W
     sty l0058                                                         ; 9e73: 84 58       .X
-    sty l0444                                                         ; 9e75: 8c 44 04    .D.
+    sty file_handle                                                   ; 9e75: 8c 44 04    .D.
     sty l0055                                                         ; 9e78: 84 55       .U
     jsr osbyte                                                        ; 9e7a: 20 f4 ff     ..            ; Write reset intercept code (operand high), value X=255
     lda #&0f                                                          ; 9e7d: a9 0f       ..
@@ -5050,27 +5052,30 @@ l9be5 = sub_c9be4+1
     ldx #0                                                            ; 9e83: a2 00       ..
     lda #osbyte_read_write_current_language_rom_bank                  ; 9e85: a9 fc       ..
     jsr osbyte                                                        ; 9e87: 20 f4 ff     ..            ; Read current language ROM number
-    cpx l0de9                                                         ; 9e8a: ec e9 0d    ...            ; X=value of current language ROM number
-    bne c9e92                                                         ; 9e8d: d0 03       ..
+    cpx X_IND1V_Rom_number                                            ; 9e8a: ec e9 0d    ...            ; X=value of current language ROM number
+    bne enter_language_rom                                            ; 9e8d: d0 03       ..
     jmp c80f4                                                         ; 9e8f: 4c f4 80    L..
 
+; ***************************************************************************************
 ; &9e92 referenced 1 time by &9e8d
-.c9e92
-    ldx l0de9                                                         ; 9e92: ae e9 0d    ...            ; X=ROM number
+.enter_language_rom
+    ldx X_IND1V_Rom_number                                            ; 9e92: ae e9 0d    ...            ; X=ROM number
     lda #osbyte_enter_language                                        ; 9e95: a9 8e       ..
     jmp osbyte                                                        ; 9e97: 4c f4 ff    L..            ; Enter language ROM X
 
+; ***************************************************************************************
+.new_ind2v_code
     php                                                               ; 9e9a: 08          .
     lda #osbyte_read_write_last_break_type                            ; 9e9b: a9 fd       ..
     ldy #&ff                                                          ; 9e9d: a0 ff       ..
     ldx #0                                                            ; 9e9f: a2 00       ..
     jsr osbyte                                                        ; 9ea1: 20 f4 ff     ..            ; Read type of last reset
     cpx #0                                                            ; 9ea4: e0 00       ..             ; X=value of type of last reset
-    bne c9eee                                                         ; 9ea6: d0 46       .F
+    bne set_X_IND1_X_IND2_rom_number                                  ; 9ea6: d0 46       .F
     jsr sub_cab73                                                     ; 9ea8: 20 73 ab     s.
     plp                                                               ; 9eab: 28          (
     bcc return_11                                                     ; 9eac: 90 28       .(
-    jsr sub_c9e02                                                     ; 9eae: 20 02 9e     ..
+    jsr print_help_name                                               ; 9eae: 20 02 9e     ..
     jsr osnewl                                                        ; 9eb1: 20 e7 ff     ..            ; Write newline (characters 10 and 13)
     jsr osnewl                                                        ; 9eb4: 20 e7 ff     ..            ; Write newline (characters 10 and 13)
     ldx #buffer_keyboard                                              ; 9eb7: a2 00       ..
@@ -5083,23 +5088,25 @@ l9be5 = sub_c9be4+1
 .loop_c9ec2
     ldx l0052                                                         ; 9ec2: a6 52       .R
     lda old,x                                                         ; 9ec4: bd e0 9e    ...
-    beq c9ed2                                                         ; 9ec7: f0 09       ..
+    beq insert_keystroke_from_stack                                   ; 9ec7: f0 09       ..
     inx                                                               ; 9ec9: e8          .
 .sub_c9eca
     stx l0052                                                         ; 9eca: 86 52       .R
-    jsr sub_c9ed7                                                     ; 9ecc: 20 d7 9e     ..
+    jsr insert_keystroke                                              ; 9ecc: 20 d7 9e     ..
     jmp loop_c9ec2                                                    ; 9ecf: 4c c2 9e    L..
 
+; ***************************************************************************************
 ; &9ed2 referenced 1 time by &9ec7
-.c9ed2
+.insert_keystroke_from_stack
     pla                                                               ; 9ed2: 68          h
-    jsr sub_c9ed7                                                     ; 9ed3: 20 d7 9e     ..
+    jsr insert_keystroke                                              ; 9ed3: 20 d7 9e     ..
 ; &9ed6 referenced 1 time by &9eac
 .return_11
     rts                                                               ; 9ed6: 60          `
 
+; ***************************************************************************************
 ; &9ed7 referenced 2 times by &9ecc, &9ed3
-.sub_c9ed7
+.insert_keystroke
     ldx #buffer_keyboard                                              ; 9ed7: a2 00       ..
     tay                                                               ; 9ed9: a8          .
     lda #osbyte_insert_buffer                                         ; 9eda: a9 8a       ..
@@ -5115,15 +5122,16 @@ l9be5 = sub_c9be4+1
     equs "     "                                                      ; 9ee6: 20 20 20...
     equb &0b, &0d, 0                                                  ; 9eeb: 0b 0d 00    ...
 
+; ***************************************************************************************
 ; &9eee referenced 1 time by &9ea6
-.c9eee
+.set_X_IND1_X_IND2_rom_number
     lda #osbyte_read_write_first_byte_break_intercept                 ; 9eee: a9 f7       ..
     ldy #0                                                            ; 9ef0: a0 00       ..
     ldx #0                                                            ; 9ef2: a2 00       ..
     jsr osbyte                                                        ; 9ef4: 20 f4 ff     ..            ; Write reset intercept code (opcode), value X=0
     lda #0                                                            ; 9ef7: a9 00       ..
     sta X_IND2V_Rom_number                                            ; 9ef9: 8d ec 0d    ...
-    sta l0de9                                                         ; 9efc: 8d e9 0d    ...
+    sta X_IND1V_Rom_number                                            ; 9efc: 8d e9 0d    ...
     plp                                                               ; 9eff: 28          (
     rts                                                               ; 9f00: 60          `
 
@@ -5851,7 +5859,7 @@ l9be5 = sub_c9be4+1
     beq return_14                                                     ; a36a: f0 1f       ..
 ; &a36c referenced 1 time by &a364
 .ca36c
-    lda l0444                                                         ; a36c: ad 44 04    .D.
+    lda file_handle                                                   ; a36c: ad 44 04    .D.
     beq ca3cf                                                         ; a36f: f0 5e       .^
     sta l046c                                                         ; a371: 8d 6c 04    .l.
     sty l0471                                                         ; a374: 8c 71 04    .q.
@@ -5979,7 +5987,7 @@ l9be5 = sub_c9be4+1
     bit l0056                                                         ; a420: 24 56       $V
     beq ca3e6                                                         ; a422: f0 c2       ..
     ldx #&3a ; ':'                                                    ; a424: a2 3a       .:             ; X=zero page address for result
-    ldy l0444                                                         ; a426: ac 44 04    .D.            ; Y=file handle
+    ldy file_handle                                                   ; a426: ac 44 04    .D.            ; Y=file handle
     lda #0                                                            ; a429: a9 00       ..
     jsr osargs                                                        ; a42b: 20 da ff     ..            ; Get sequential file pointer into zero page address X (A=0)
     jsr sub_cac4e                                                     ; a42e: 20 4e ac     N.
@@ -6667,7 +6675,7 @@ l9be5 = sub_c9be4+1
     stx l0038                                                         ; a8d9: 86 38       .8
 ; &a8db referenced 1 time by &a8e9
 .loop_ca8db
-    ldy l0de9                                                         ; a8db: ac e9 0d    ...            ; Y=ROM number
+    ldy X_IND1V_Rom_number                                            ; a8db: ac e9 0d    ...            ; Y=ROM number
     jsr osrdsc                                                        ; a8de: 20 b9 ff     ..            ; Read byte from ROM Y or screen
     inc osrdsc_ptr                                                    ; a8e1: e6 f6       ..
     bne ca8e7                                                         ; a8e3: d0 02       ..
@@ -6693,7 +6701,7 @@ l9be5 = sub_c9be4+1
     bne ca90e                                                         ; a901: d0 0b       ..
 ; &a903 referenced 2 times by &a910, &a914
 .ca903
-    ldy l0de9                                                         ; a903: ac e9 0d    ...            ; Y=ROM number
+    ldy X_IND1V_Rom_number                                            ; a903: ac e9 0d    ...            ; Y=ROM number
     jsr osrdsc                                                        ; a906: 20 b9 ff     ..            ; Read byte from ROM Y or screen
     bmi ca916                                                         ; a909: 30 0b       0.
     jsr sub_ca950                                                     ; a90b: 20 50 a9     P.
@@ -7095,7 +7103,7 @@ l9be5 = sub_c9be4+1
 .caba4
     sta l0076                                                         ; aba4: 85 76       .v
     jsr c80e3                                                         ; aba6: 20 e3 80     ..
-    lda l0444                                                         ; aba9: ad 44 04    .D.
+    lda file_handle                                                   ; aba9: ad 44 04    .D.
     beq cac0e                                                         ; abac: f0 60       .`
     lda l000a                                                         ; abae: a5 0a       ..
     pha                                                               ; abb0: 48          H
@@ -7159,7 +7167,7 @@ l9be5 = sub_c9be4+1
 .sub_cac14
     pha                                                               ; ac14: 48          H
     lda #&53 ; 'S'                                                    ; ac15: a9 53       .S
-    ldy l0444                                                         ; ac17: ac 44 04    .D.            ; Y=file handle
+    ldy file_handle                                                   ; ac17: ac 44 04    .D.            ; Y=file handle
     jsr osbput                                                        ; ac1a: 20 d4 ff     ..            ; Write a single byte A=83 to an open file Y
     pla                                                               ; ac1d: 68          h
     jsr osbput                                                        ; ac1e: 20 d4 ff     ..            ; Write a single byte A to an open file Y
@@ -7226,7 +7234,7 @@ l9be5 = sub_c9be4+1
     ora l0101,x                                                       ; ac84: 1d 01 01    ...
     sta l0101,x                                                       ; ac87: 9d 01 01    ...
     ldx #&3a ; ':'                                                    ; ac8a: a2 3a       .:             ; X=zero page address to write from
-    ldy l0444                                                         ; ac8c: ac 44 04    .D.            ; Y=file handle
+    ldy file_handle                                                   ; ac8c: ac 44 04    .D.            ; Y=file handle
     lda #1                                                            ; ac8f: a9 01       ..
     jsr osargs                                                        ; ac91: 20 da ff     ..            ; Write sequential file pointer from zero page address X (A=1)
     pla                                                               ; ac94: 68          h
@@ -7379,7 +7387,7 @@ lad20 = cad1f+1
     tya                                                               ; ad82: 98          .
     pha                                                               ; ad83: 48          H
     txa                                                               ; ad84: 8a          .
-    ldy l0444                                                         ; ad85: ac 44 04    .D.
+    ldy file_handle                                                   ; ad85: ac 44 04    .D.
     jsr sub_cad96                                                     ; ad88: 20 96 ad     ..
     inc l0075                                                         ; ad8b: e6 75       .u
     txa                                                               ; ad8d: 8a          .
@@ -7423,7 +7431,7 @@ lad20 = cad1f+1
     lda l0075                                                         ; adb2: a5 75       .u
     beq return_21                                                     ; adb4: f0 fb       ..
     ldx #&3c ; '<'                                                    ; adb6: a2 3c       .<             ; X=zero page address for result
-    ldy l0444                                                         ; adb8: ac 44 04    .D.            ; Y=file handle
+    ldy file_handle                                                   ; adb8: ac 44 04    .D.            ; Y=file handle
     lda #0                                                            ; adbb: a9 00       ..
     jsr osargs                                                        ; adbd: 20 da ff     ..            ; Get sequential file pointer into zero page address X (A=0)
     ldx #&59 ; 'Y'                                                    ; adc0: a2 59       .Y             ; X=zero page address to write from
@@ -7448,7 +7456,7 @@ lad20 = cad1f+1
 ; ***************************************************************************************
 .srend_cmd
     jsr c80e3                                                         ; adea: 20 e3 80     ..
-    lda l0444                                                         ; aded: ad 44 04    .D.
+    lda file_handle                                                   ; aded: ad 44 04    .D.
     beq return_22                                                     ; adf0: f0 12       ..
     jsr sub_cadab                                                     ; adf2: 20 ab ad     ..
     lda #&3a ; ':'                                                    ; adf5: a9 3a       .:
@@ -8310,8 +8318,8 @@ save pydis_start, pydis_end
 ;     l006f:                                     12
 ;     sub_c9554:                                 12
 ;     sub_c95f3:                                 12
+;     file_handle:                               11
 ;     l0067:                                     11
-;     l0444:                                     11
 ;     sub_c919d:                                 11
 ;     sub_c9485:                                 11
 ;     sub_c9659:                                 11
@@ -8329,6 +8337,7 @@ save pydis_start, pydis_end
 ;     osnewl:                                     9
 ;     return_10:                                  9
 ;     sub_c9559:                                  9
+;     X_IND1V_Rom_number:                         8
 ;     c8525:                                      8
 ;     c95a9:                                      8
 ;     c96b6:                                      8
@@ -8336,7 +8345,6 @@ save pydis_start, pydis_end
 ;     l001a:                                      8
 ;     l0065:                                      8
 ;     l0068:                                      8
-;     l0de9:                                      8
 ;     osbput:                                     8
 ;     osrdsc_ptr:                                 8
 ;     osrdsc_ptr+0:                               8
@@ -8483,6 +8491,7 @@ save pydis_start, pydis_end
 ;     l0108:                                      3
 ;     l9894:                                      3
 ;     oscli:                                      3
+;     print_help_name:                            3
 ;     print_text_failed_in:                       3
 ;     romsel_copy:                                3
 ;     sub_c94bf:                                  3
@@ -8492,15 +8501,16 @@ save pydis_start, pydis_end
 ;     sub_c9928:                                  3
 ;     sub_c99bc:                                  3
 ;     sub_c9ada:                                  3
-;     sub_c9e02:                                  3
 ;     sub_c9f01:                                  3
 ;     sub_c9f0e:                                  3
 ;     sub_ca293:                                  3
 ;     sub_ca3e8:                                  3
 ;     sub_cac14:                                  3
 ;     sub_cbce2:                                  3
+;     X_IND1V:                                    2
+;     X_IND1V+0:                                  2
+;     X_IND1V+1:                                  2
 ;     c808b:                                      2
-;     c80dc:                                      2
 ;     c8204:                                      2
 ;     c822f:                                      2
 ;     c84da:                                      2
@@ -8546,7 +8556,6 @@ save pydis_start, pydis_end
 ;     c9c7f:                                      2
 ;     c9d2a:                                      2
 ;     c9d5d:                                      2
-;     c9e18:                                      2
 ;     c9fdb:                                      2
 ;     ca04e:                                      2
 ;     ca18e:                                      2
@@ -8580,6 +8589,7 @@ save pydis_start, pydis_end
 ;     error_byte_space:                           2
 ;     error_phase_lock:                           2
 ;     get_filename_from_command_line:             2
+;     insert_keystroke:                           2
 ;     l0009:                                      2
 ;     l000d:                                      2
 ;     l005d:                                      2
@@ -8596,14 +8606,14 @@ save pydis_start, pydis_end
 ;     l04fa:                                      2
 ;     l04fb:                                      2
 ;     l0509:                                      2
-;     l0de7:                                      2
-;     l0de8:                                      2
 ;     l6060:                                      2
 ;     l7e00:                                      2
 ;     lff48:                                      2
 ;     osfile:                                     2
+;     print_full_help_text:                       2
 ;     print_stored_text:                          2
 ;     print_text_module:                          2
+;     restore_everything_exit:                    2
 ;     return_1:                                   2
 ;     return_14:                                  2
 ;     return_15:                                  2
@@ -8644,7 +8654,6 @@ save pydis_start, pydis_end
 ;     sub_c9ca1:                                  2
 ;     sub_c9cab:                                  2
 ;     sub_c9cbe:                                  2
-;     sub_c9ed7:                                  2
 ;     sub_ca30b:                                  2
 ;     sub_ca333:                                  2
 ;     sub_ca4be:                                  2
@@ -8653,6 +8662,9 @@ save pydis_start, pydis_end
 ;     sub_cad0f:                                  2
 ;     sub_cae05:                                  2
 ;     sub_cae12:                                  2
+;     X_IND2V:                                    1
+;     X_IND2V+0:                                  1
+;     X_IND2V+1:                                  1
 ;     brk_service_call:                           1
 ;     c807c:                                      1
 ;     c80b8:                                      1
@@ -8910,10 +8922,6 @@ save pydis_start, pydis_end
 ;     c9d17:                                      1
 ;     c9d4c:                                      1
 ;     c9d50:                                      1
-;     c9df8:                                      1
-;     c9e92:                                      1
-;     c9ed2:                                      1
-;     c9eee:                                      1
 ;     c9f1b:                                      1
 ;     c9f1e:                                      1
 ;     c9f30:                                      1
@@ -9037,6 +9045,7 @@ save pydis_start, pydis_end
 ;     close_file_handle:                          1
 ;     disable_vdu_enable_serial_port_and_spool:   1
 ;     end_of_stored_text:                         1
+;     enter_language_rom:                         1
 ;     error_bad_displacement:                     1
 ;     error_bad_register:                         1
 ;     error_escape:                               1
@@ -9047,6 +9056,7 @@ save pydis_start, pydis_end
 ;     gsinit:                                     1
 ;     handle_brk_service_call:                    1
 ;     help_service_call:                          1
+;     insert_keystroke_from_stack:                1
 ;     l0001:                                      1
 ;     l0002:                                      1
 ;     l0003:                                      1
@@ -9078,8 +9088,6 @@ save pydis_start, pydis_end
 ;     l061b:                                      1
 ;     l06f0:                                      1
 ;     l0c06:                                      1
-;     l0dea:                                      1
-;     l0deb:                                      1
 ;     l1096:                                      1
 ;     l19b1:                                      1
 ;     l3c00:                                      1
@@ -9209,6 +9217,7 @@ save pydis_start, pydis_end
 ;     print_bad_name:                             1
 ;     print_stored_text_loop:                     1
 ;     print_text_basic:                           1
+;     print_text_no:                              1
 ;     print_text_not_found_abort_retry:           1
 ;     print_text_searching_for:                   1
 ;     print_text_wrong:                           1
@@ -9231,6 +9240,7 @@ save pydis_start, pydis_end
 ;     serial_number_byte_4:                       1
 ;     serial_number_check_digit:                  1
 ;     service_handler:                            1
+;     set_X_IND1_X_IND2_rom_number:               1
 ;     sub_c850d:                                  1
 ;     sub_c8530:                                  1
 ;     sub_c857c:                                  1
